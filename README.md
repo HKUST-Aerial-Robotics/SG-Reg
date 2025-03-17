@@ -32,3 +32,11 @@
 * [Oct 2024] Paper submitted to IEEE T-RO.
 
 We will publish the code once the paper is accepted.
+
+### To develop
+- [ ] Scene graph network code and the trained network weight. 
+- [ ] Clean the data structure and upload the scene graph data for validation. 
+- [ ] Registration back-end in python interface.
+- [ ] Remove unncessary dependencies.
+- [ ] Validation the entire system in a new computer. 
+- [ ] A tutorial for running the validation.
