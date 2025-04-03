@@ -1,0 +1,93 @@
+model:
+  fix_modules: ['backbone','optimal_transport','shape_backbone','sgnn']
+dataset:
+  dataroot: /data2/RioGraph
+  load_transform: True
+  min_iou: 0.2 # for gt match
+  global_edges_dist: 2.0
+  online_bert: True
+train:
+  batch_size: 1
+  num_workers: 8
+  epochs: 80
+  optimizer: Adam # Adam, SGD
+  lr: 0.01
+  weight_decay: 0.0001
+  momentum: 0.9
+  save_interval: 10
+  val_interval: 1
+  registration_in_train: True
+backbone:
+  num_stages: 4
+  init_voxel_size: 0.05
+  base_radius: 2.5
+  base_sigma: 2.0
+  input_dim: 1
+  output_dim: 256
+  init_dim: 64
+  kernel_size: 15
+  group_norm: 32
+shape_encoder:
+  input_from_stages: 1
+  output_dim: 1024
+  kernel_size: 15
+  init_radius: 2.5 # 0.125
+  init_sigma: 2.0 # 0.1
+  group_norm: 32
+  point_limit: 2048
+scenegraph:
+  bert_dim: 768
+  semantic_dim: 64
+  pos_dim: -1
+  box_dim: 8
+  fuse_shape: True
+  fuse_stage: late
+  node_dim: 64
+  encode_method: 'gnn'
+  gnn:
+    all_self_edges: False
+    position_encoding: true
+    layers: [ltriplet] # sage,self,gtop
+    triplet_mlp: concat # concat, ffn or projector
+    triplet_activation: gelu
+    triplet_number: 20
+    heads: 1
+    hidden_dim : 16
+    enable_dist_embedding: true
+    enable_angle_embedding: True
+    reduce: 'mean'
+  se_layer: False
+instance_matching:
+  match_layers: [0,1,2]
+  topk: 3
+  min_score: 0.1
+  multiply_matchability: false
+fine_matching:
+  min_nodes: 3
+  num_points_per_instance: 256    
+  num_sinkhorn_iterations: 100
+  topk: 3
+  acceptance_radius: 0.1
+  max_instance_selection: true
+  mutual: True
+  confidence_threshold: 0.05
+  use_dustbin: True
+  ignore_semantics: [floor, carpet, ceiling,] #[floor, carpet, ceiling]
+loss:
+  instance_match:
+    loss_func: nllv2 # overlap, nll
+    nll_negative: 0.0
+    gt_alpha: 2.0
+  fine_loss_weight: -1.0
+  shape_contrast_weight: -1.0
+  gnode_match_weight: 1.0
+  start_epoch: -1
+  positive_point_radius: 0.1
+  contrastive_temp: 0.1
+  contrastive_postive_overlap: 0.3
+  # nll_matchability: False
+eval: 
+  acceptance_overlap: 0.0
+  acceptance_radius: 0.1
+  rmse_threshold: 0.2
+  gt_node_iou: 0.3

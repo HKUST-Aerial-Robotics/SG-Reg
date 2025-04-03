@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Validation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/model/val.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0",
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--cfg_file",
+                "${workspaceFolder}/config/rio.yaml",
+                "--checkpoint",
+                "${workspaceFolder}/checkpoints/sgnet_scannet_0080",
+            ]
+        }
+    ]
+}
