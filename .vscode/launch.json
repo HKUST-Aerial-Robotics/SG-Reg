@@ -9,7 +9,7 @@
             "name": "Validation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/model/val.py",
+            "program": "${workspaceFolder}/sgreg/val.py",
             "console": "integratedTerminal",
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",

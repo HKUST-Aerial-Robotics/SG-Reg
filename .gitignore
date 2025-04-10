@@ -1,3 +1,8 @@
 build
 data
 checkpoints
+sgreg/__pycache__
+sgreg/*/__pycache__
+
+*.egg-info
+*.so
