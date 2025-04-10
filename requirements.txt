@@ -6,3 +6,4 @@ open3d
 matplotlib
 scipy
 tensorboard
+rerun-sdk
