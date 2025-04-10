@@ -33,10 +33,29 @@
 
 We will publish the code once the paper is accepted.
 
-### To develop
-- [ ] Scene graph network code and the trained network weight. 
-- [ ] Clean the data structure and upload the scene graph data for validation. 
+## Install 
+### Create environment
+
+```bash
+conda create sgreg python=3.9
+```
+
+### Install dependencies
+Install PyTorch 2.1.2 and other dependencies.
+```bash
+conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=11.8 -c pytorch -c nvidia 
+```
+```bash
+pip install -r requirements.txt
+python setup.py build develop
+```
+
+## To develop
+- [x] Scene graph network code and verify its inference.
+- [x] Remove unncessary dependencies.
+- [x] Clean the data structure.
+- [ ] Provide RIO scene graph data for download.
+- [ ] Provide network weight for download.
 - [ ] Registration back-end in python interface.
-- [ ] Remove unncessary dependencies.
 - [ ] Validation the entire system in a new computer. 
 - [ ] A tutorial for running the validation.

@@ -55,3 +55,45 @@ def write_registration_results(registration_dict:dict,
                estimated_transforms,
                fmt='%.6f')
 
+def read_pred_nodes(dir:str):
+    pred_src_instances = []
+    pred_ref_instances = []
+    pred_src_centroids = []
+    pred_ref_centroids = []
+    gt_mask = []
+    
+    with open(dir,'r') as f:
+        lines = f.readlines()
+        for line in lines[1:]:
+            line = line.strip().split(' ')
+            pred_src_instances.append(int(line[0]))
+            pred_ref_instances.append(int(line[1]))
+            gt_mask.append(int(line[2]))
+            pred_src_centroids.append([float(line[3]),float(line[4]),float(line[5])])
+            pred_ref_centroids.append([float(line[6]),float(line[7]),float(line[8])])
+        f.close()
+    
+    return np.array(pred_src_instances), \
+            np.array(pred_ref_instances), \
+            np.array(pred_src_centroids), \
+            np.array(pred_ref_centroids), \
+            np.array(gt_mask)
+
+def read_corr_scores(dir:str):
+    corr_instances = []
+    corr_scores = []
+    corr_masks = []
+    
+    with open(dir,'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            if '#' in line:
+                continue
+            line = line.strip().split(' ')
+            corr_instances.append(int(line[0]))
+            corr_scores.append(float(line[1]))
+            corr_masks.append(int(line[2]))
+        f.close()
+        return np.array(corr_instances), \
+                np.array(corr_scores), \
+                np.array(corr_masks)
