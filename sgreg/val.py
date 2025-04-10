@@ -5,10 +5,10 @@ import numpy as np
 import torch
 
 from sgreg.dataset.dataset_factory import val_data_loader
-from sgreg.config import create_cfg
+from sgreg.utils.config import create_cfg
 from sgreg.utils.torch import to_cuda, checkpoint_restore
 from sgreg.sg_reg import SGNet, SGNetDecorator
-from train import val_epoch, create_model
+from train import val_epoch
 
 def test_epoch(data_loader, model, test_model_fn, save_dir=''):
     # todo: inference without gt evaluation
@@ -138,7 +138,6 @@ if __name__ == '__main__':
     parser.add_argument('--epoch',type=int,help='Load checkpoint at assigned epoch',default=-1)
     parser.add_argument('--output', type=str, default='', help='output folder')
     args = parser.parse_args()
-    print('SGREG FLAG')
     
     # Paramters 
     assert os.path.exists(args.cfg_file), 'config file {} not found'.format(args.cfg_file)

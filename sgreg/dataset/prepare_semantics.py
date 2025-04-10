@@ -17,9 +17,9 @@ from sgreg.bert.get_tokenizer import get_tokenlizer, get_pretrained_language_mod
 from sgreg.bert.bertwarper import generate_bert_fetures
 
 # from model.ops.transformation import apply_transform
-from sgreg.dataset.ScenePairDataset import ScenePairDataset
+from sgreg.dataset.scene_pair_dataset import ScenePairDataset
 # from model.dataset.DatasetFactory import train_data_loader, val_data_loader
-from sgreg.config import create_cfg
+from sgreg.utils.config import create_cfg
 # from model.dataset.ScanNetPairDataset import read_scans,load_scene_graph
 
 def generate_semantic_embeddings(data_dict):

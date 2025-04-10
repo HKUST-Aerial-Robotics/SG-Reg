@@ -1,0 +1,8 @@
+torch_geometric
+numpy==1.26.2
+omegaconf
+transformers
+open3d
+matplotlib
+scipy
+tensorboard

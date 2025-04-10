@@ -6,7 +6,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 
 from sgreg.dataset.dataset_factory import train_data_loader, val_data_loader
-from sgreg.config import create_cfg
+from sgreg.utils.config import create_cfg
 from sgreg.utils.torch import to_cuda, checkpoint_restore, checkpoint_save
 from sgreg.utils.utils import RecallMetrics, load_submodule_state_dict, summary_dict
 from sgreg.loss.eval import compute_node_matching, compute_registration

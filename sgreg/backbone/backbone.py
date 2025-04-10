@@ -78,8 +78,6 @@ class KPConvFPN(nn.Module):
 
         self.decoder3 = UnaryBlock(init_dim * 24, init_dim * 8, group_norm)
         self.decoder2 = LastUnaryBlock(init_dim * 12, output_dim)
-        
-        print('INIT KPConvFPN')
 
     def forward(self, feats,
                     points_list,
