@@ -13,7 +13,6 @@
             "console": "integratedTerminal",
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",
-                "PYTHONPATH": "${workspaceFolder}"
             },
             "args": [
                 "--cfg_file",

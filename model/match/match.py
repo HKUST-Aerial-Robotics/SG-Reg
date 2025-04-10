@@ -1,6 +1,7 @@
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
+from omegaconf import OmegaConf
 from model.match.learnable_sinkhorn import LearnableLogOptimalTransport
 
 def calculate_similarity_scores(data_dict:dict, src_feats:torch.Tensor, ref_feats:torch.Tensor):
@@ -120,6 +121,7 @@ def match_asignment_script_fn(desc0:torch.Tensor, desc1:torch.Tensor):
 
 class MatchAssignment(nn.Module):
     '''
+    This is a module adopted from LightGlue.
     It can be used:
         scores, sim = MatchAssignment(dim)(desc0, desc1), 
         desc0, desc1: (b,m,d)
@@ -241,3 +243,69 @@ class SinkhornMatch(nn.Module):
         scores = torch.exp(scores).unsqueeze(0)
         assignment = compute_correspondence_matrix(scores=scores[:-1,:-1],topk=self.topk,threshold=self.threshold) # (b,m,n)
         return Kn.squeeze(), scores.squeeze(), assignment.squeeze()
+
+# class SinkhornMatch_Superglue(nn.Module):
+#     ''' from SuperGlue'''
+#     def __init__(self, conf) -> None:
+#         super().__init__()
+#         self.conf = conf        
+#         self.register_parameter('alpha', torch.nn.Parameter(torch.tensor(1.0)))
+
+#         # self.iters = conf['iters']
+#         # self.alpha = conf['alpha']
+        
+#     def forward(self, desc0: torch.Tensor, desc1: torch.Tensor):
+#         scores = torch.einsum('nd,md->nm', desc0, desc1) #
+#         scores = scores/ self.conf.dim**.5    
+#         scores = self.log_optimal_transport(scores.unsqueeze(0), alpha=torch.tensor(self.conf.alpha).to('cuda'), iters=self.conf.iters) # (1,n'+1,m'+1)
+        
+#         return self.find_assignment(scores)
+
+#     def find_assignment(self,scores):
+#         # Get the matches with score above "match_threshold".
+#         max0, max1 = scores[:, :-1, :-1].max(2), scores[:, :-1, :-1].max(1)
+#         indices0, indices1 = max0.indices, max1.indices # (1,n'), (1,m')
+#         mutual0 = self.arange_like(indices0, 1)[None] == indices1.gather(1, indices0) # (1,n'), bool
+#         mutual1 = self.arange_like(indices1, 1)[None] == indices0.gather(1, indices1) # (1,m'), bool
+#         zero = scores.new_tensor(0)
+#         mscores0 = torch.where(mutual0, max0.values.exp(), zero) # (1,n'), float
+#         mscores1 = torch.where(mutual1, mscores0.gather(1, indices1), zero)
+#         valid0 = mutual0 & (mscores0 > self.conf['match_threshold']) # (1,n'), bool
+#         valid1 = mutual1 & valid0.gather(1, indices1)
+#         indices0 = torch.where(valid0, indices0, indices0.new_tensor(-1)) # (1,n')
+#         indices1 = torch.where(valid1, indices1, indices1.new_tensor(-1)) # (1,m')
+        
+#         return {'indices0':indices0,'indices1':indices1,'mscores0':mscores0,'mscores1':mscores1}
+
+#     def log_sinkhorn_iterations(self,Z: torch.Tensor, log_mu: torch.Tensor, log_nu: torch.Tensor, iters: int) -> torch.Tensor:
+#         """ Perform Sinkhorn Normalization in Log-space for stability"""
+#         u, v = torch.zeros_like(log_mu), torch.zeros_like(log_nu)
+#         for _ in range(iters):
+#             u = log_mu - torch.logsumexp(Z + v.unsqueeze(1), dim=2)
+#             v = log_nu - torch.logsumexp(Z + u.unsqueeze(2), dim=1)
+#         return Z + u.unsqueeze(2) + v.unsqueeze(1)
+
+#     def log_optimal_transport(self,scores: torch.Tensor, alpha: torch.Tensor, iters: int) -> torch.Tensor:
+#         """ Perform Differentiable Optimal Transport in Log-space for stability"""
+#         b, m, n = scores.shape
+#         one = scores.new_tensor(1)
+#         ms, ns = (m*one).to(scores), (n*one).to(scores)
+
+#         bins0 = alpha.expand(b, m, 1)
+#         bins1 = alpha.expand(b, 1, n)
+#         alpha = alpha.expand(b, 1, 1)
+
+#         couplings = torch.cat([torch.cat([scores, bins0], -1),
+#                             torch.cat([bins1, alpha], -1)], 1)
+
+#         norm = - (ms + ns).log()
+#         log_mu = torch.cat([norm.expand(m), ns.log()[None] + norm])
+#         log_nu = torch.cat([norm.expand(n), ms.log()[None] + norm])
+#         log_mu, log_nu = log_mu[None].expand(b, -1), log_nu[None].expand(b, -1)
+
+#         Z = self.log_sinkhorn_iterations(couplings, log_mu, log_nu, iters)
+#         Z = Z - norm  # multiply probabilities by M+N
+#         return Z
+    
+#     def arange_like(self,x, dim: int):
+#         return x.new_ones(x.shape[dim]).cumsum(0) - 1  # traceable in 1.1

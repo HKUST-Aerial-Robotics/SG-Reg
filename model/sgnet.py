@@ -1,18 +1,22 @@
-import time
+import sys,time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+# from model.bert.get_tokenizer import get_tokenlizer, get_pretrained_language_model
+from model.bert.bertwarper import generate_bert_fetures
 
-from model.backbone import KPConvFPN, KPConvShape, SEModule
-from model.backbone import encode_batch_scenes_points, encode_batch_scenes_instances
-from model.gnn import GraphNeuralNetwork, NodesInitLayer
-from model.match.match import MatchAssignment, SinkhornMatch
+from model.match.match import MatchAssignment, SinkhornMatch, compute_correspondence_matrix
 from model.match.learnable_sinkhorn import LearnableLogOptimalTransport
 from model.loss.loss import FineMatchingLoss, InstanceMatchingLoss, contrastive_loss_fn
 from model.loss.eval import Evaluator, eval_instance_match, eval_instance_match_new
 from model.registration.local_global_registration import LocalGlobalRegistration
-
+from model.backbone import KPConvFPN, KPConvShape
+from model.backbone import encode_batch_scenes_points, encode_batch_scenes_instances
+from model.backbone import SEModule
+from model.gnn import GraphNeuralNetwork, NodesInitLayer
+from model.utils.utils import update_dict, create_mask_from_edges
 from model.utils.tictoc import TicToc
+# from model.ops.instance_partition import sample_k_instance_points
 
 class SGNet(nn.Module):
     default_config = {
@@ -50,7 +54,22 @@ class SGNet(nn.Module):
                                              conf.dataset.online_bert)
 
         # GAT layers
-        self.spatial_gnn = GraphNeuralNetwork(self.conf.scenegraph) 
+        assert self.conf.scenegraph.encode_method in ['gnn','geotransformer'], \
+            'Invalid scene graph encode method'
+        if self.conf.scenegraph.encode_method=='gnn':
+            self.sgnn = GraphNeuralNetwork(self.conf.scenegraph) 
+        else:
+            assert False, 'Geometric Transformer is abandoned' # used in baseline eval
+            self.geotransformer = GeometricTransformer(self.conf.scenegraph.node_dim,
+                        self.conf.scenegraph.node_dim,
+                        self.conf.scenegraph.node_dim,
+                        self.conf.scenegraph.geotransformer.num_heads,
+                        self.conf.scenegraph.geotransformer.blocks,
+                        self.conf.scenegraph.geotransformer.sigma_d,
+                        self.conf.scenegraph.geotransformer.sigma_a,
+                        self.conf.scenegraph.geotransformer.angle_k,
+                        reduction_a = self.conf.scenegraph.geotransformer.reduction_a)
+        
         self.se_layer = SEModule(self.conf.scenegraph.node_dim+
                                  self.conf.scenegraph.semantic_dim)
         
@@ -63,9 +82,9 @@ class SGNet(nn.Module):
         match_feat_dim.append(self.conf.shape_encoder.output_dim
                               +match_feat_dim[-1])
         
-        self.node_matching_layers = nn.ModuleDict() # [init_node_match_layer, coarse_match_layer, dense_match_layer]
+        self.match_layers = nn.ModuleDict() # [init_node_match_layer, coarse_match_layer, dense_match_layer]
         for i in self.conf.instance_matching.match_layers:
-            self.node_matching_layers[str(i)] = MatchAssignment(
+            self.match_layers[str(i)] = MatchAssignment(
                 match_feat_dim[i],
                 self.conf.instance_matching.min_score,
                 self.conf.instance_matching.topk,
@@ -184,6 +203,29 @@ class SGNet(nn.Module):
                  'instances_d_feats':src_instance_d_feats,
                  'instances_shapes':src_instance_shapes}
             
+    def encode_nodes(self,graph_dict,shape_embeddings):
+        ''' Encode node [semantic, bbox, shape] features.'''
+        
+        if 'semantic_embeddings' in graph_dict and self.online_bert==False:
+            semantic_embeddings = graph_dict['semantic_embeddings']
+        else:
+            semantic_embeddings = generate_bert_fetures(self.tokenizer,
+                                                        self.bert,
+                                                        graph_dict['labels'],
+                                                        CUDA=True)
+        semantic_feats = self.mlp_semantic(semantic_embeddings)
+        
+        concat_feat = [semantic_feats]
+        if self.conf.scenegraph.box_dim>0:
+            box_feats = self.mlp_box(graph_dict['boxes'])
+            concat_feat.append(box_feats)
+        if self.conf.scenegraph.fuse_shape and self.conf.scenegraph.fuse_stage=='early':
+            concat_feat.append(self.mlp_shape(shape_embeddings))
+        concat_feat = torch.cat(concat_feat,dim=1)
+        concat_feat = self.feat_projector(concat_feat)
+        
+        return concat_feat        
+    
     def forward(self, data_dict): 
         ''' Encode all nodes in both graphs.'''  
         torch.cuda.memory.reset_peak_memory_stats()
@@ -247,7 +289,7 @@ class SGNet(nn.Module):
             torch.isnan(x_ref0).sum()==0, 'NaN in node features'
 
         # 3. Encode scene graph by triplet-boosted GAT
-        x_src, x_ref, t_gnn = self.spatial_gnn(x_src0,x_ref0,data_dict)
+        x_src, x_ref, t_gnn = self.sgnn(x_src0,x_ref0,data_dict)
         time_list.append(1000*t_gnn) # gnn
         
         # 4. Fuse node features from multiple modalities
@@ -326,7 +368,7 @@ class SGNet(nn.Module):
             nodes_mask_src = batch_graph_pair['src_graph']['scene_mask']==scan_id
             nodes_mask_ref = batch_graph_pair['ref_graph']['scene_mask']==scan_id
             
-            _, logscores, k_assignment = self.node_matching_layers[str(l)](
+            _, logscores, k_assignment = self.match_layers[str(l)](
                         x_src[nodes_mask_src,:].unsqueeze(0), 
                         x_ref[nodes_mask_ref,:].unsqueeze(0))
             matches = k_assignment.nonzero().detach() # (m,2),[src_idx,tar_idx]
