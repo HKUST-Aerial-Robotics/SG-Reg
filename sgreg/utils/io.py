@@ -73,11 +73,17 @@ def read_pred_nodes(dir:str):
             pred_ref_centroids.append([float(line[6]),float(line[7]),float(line[8])])
         f.close()
     
-    return np.array(pred_src_instances), \
-            np.array(pred_ref_instances), \
-            np.array(pred_src_centroids), \
-            np.array(pred_ref_centroids), \
-            np.array(gt_mask)
+    return {'src_instances':np.array(pred_src_instances),
+            'ref_instances':np.array(pred_ref_instances),
+            'src_centroids':np.array(pred_src_centroids),
+            'ref_centroids':np.array(pred_ref_centroids),
+            'gt_mask':np.array(gt_mask)}
+    
+    # return np.array(pred_src_instances), \
+    #         np.array(pred_ref_instances), \
+    #         np.array(pred_src_centroids), \
+    #         np.array(pred_ref_centroids), \
+    #         np.array(gt_mask)
 
 def read_corr_scores(dir:str):
     corr_instances = []
@@ -97,3 +103,21 @@ def read_corr_scores(dir:str):
         return np.array(corr_instances), \
                 np.array(corr_scores), \
                 np.array(corr_masks)
+
+def read_dense_correspondences(src_corr_dir:str,
+                               ref_corr_dir:str,
+                               score_file_dir:str):
+    src_corr_pcd = o3d.io.read_point_cloud(src_corr_dir)
+    ref_corr_pcd = o3d.io.read_point_cloud(ref_corr_dir)
+    src_corr_points = np.asarray(src_corr_pcd.points) # (N,3)
+    ref_corr_points = np.asarray(ref_corr_pcd.points) # (N,3)
+
+    corr_inst, corr_scores, corr_masks = read_corr_scores(score_file_dir)
+    assert src_corr_points.shape[0] == corr_scores.shape[0]
+    assert src_corr_points.shape[0] == ref_corr_points.shape[0]
+    assert src_corr_points.shape[0] == corr_masks.shape[0]
+    
+    return {'src_corrs':src_corr_points,
+            'ref_corrs':ref_corr_points,
+            'corr_scores':corr_scores,
+            'corr_masks':corr_masks}

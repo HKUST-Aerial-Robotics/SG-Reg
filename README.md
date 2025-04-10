@@ -1,7 +1,7 @@
 <!-- # SG-Reg -->
 <div align="center">
     <h1>SG-Reg: Generalizable and Efficient</br> Scene Graph Registration</h2>
-    <strong>Submitted to IEEE T-RO</strong>
+    <strong>Accepted by IEEE T-RO</strong>
     <br>
         <a href="https://uav.hkust.edu.hk/current-members/" target="_blank">Chuhao Liu</a><sup>1</sup>,
         <a href="https://qiaozhijian.github.io/" target="_blank">Zhijian Qiao</a><sup>1</sup>,
@@ -18,9 +18,9 @@
         </h5>
         <sup>*</sup>Corresponding Author
     </p>
-    <a href=""> <img src="https://img.shields.io/badge/UnderReview-T--RO-004c99"> </a>
-    <!-- <a href='https://arxiv.org/abs/2402.04555'><img src='https://img.shields.io/badge/arXiv-2402.04555-990000' alt='arxiv'></a> -->
-    <a href="https://youtu.be/Q7qa-6QgG5U"><img alt="YouTube" src="https://img.shields.io/badge/YouTube-Video-red"/></a>
+    <a href=""> <img src="https://img.shields.io/badge/IEEE-T--RO-004c99"> </a>
+    <a href='https://arxiv.org/abs/2504.14440'><img src='https://img.shields.io/badge/arXiv-2504.14440-990000' alt='arxiv'></a>
+    <a href="https://youtu.be/IDxAmvpB2T0"><img alt="YouTube" src="https://img.shields.io/badge/YouTube-Video-red"/></a>
 </div>
 
 <p align="center">
@@ -54,6 +54,7 @@ python setup.py build develop
 - [x] Scene graph network code and verify its inference.
 - [x] Remove unncessary dependencies.
 - [x] Clean the data structure.
+- [ ] Visualize the results.
 - [ ] Provide RIO scene graph data for download.
 - [ ] Provide network weight for download.
 - [ ] Registration back-end in python interface.

@@ -1,8 +1,10 @@
 build
 data
+output
 checkpoints
 sgreg/__pycache__
 sgreg/*/__pycache__
+.vscode
 
 *.egg-info
 *.so

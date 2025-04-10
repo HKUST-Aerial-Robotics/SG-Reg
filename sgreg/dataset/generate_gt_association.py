@@ -1,100 +1,15 @@
 import os, sys
 import argparse
 import open3d as o3d
-import cv2 
 import numpy as np
 import torch
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
-from model.ops import apply_transform
+from sgreg.ops import apply_transform
 import csv
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
-from utils.utils import read_scans, read_scan_pairs
-from utils.viz_tools import build_instance_centroids
 
-class Instance:
-    def __init__(self,idx,cloud,label,score):
-        self.idx = idx
-        self.label = label
-        self.score = score
-        self.cloud = cloud
-        self.cloud_dir = None
-    def load_box(self,box):
-        self.box = box
-
-def load_scene_graph(folder_dir,
-                     voxel_size=0.02,
-                     min_instance_size=1000,
-                     ignore_types=['ceiling']):
-    ''' graph: {'nodes':{idx:Instance},'edges':{idx:idx}}
-    '''
-    # load scene graph
-    nodes = {}
-    boxes = {}
-    invalid_nodes = []
-    xyzi = []
-    global_cloud = o3d.geometry.PointCloud()
-    # IGNORE_TYPES = ['floor','carpet','wall']
-    # IGNORE_TYPES = ['ceiling']
-    
-    # load instance boxes
-    with open(os.path.join(folder_dir,'instance_box.txt')) as f:
-        count=0
-        for line in f.readlines():
-            line = line.strip()
-            if'#' in line:continue
-            parts = line.split(';')
-            idx = int(parts[0])
-            center = np.array([float(x) for x in parts[1].split(',')])
-            rotation = np.array([float(x) for x in parts[2].split(',')])
-            extent = np.array([float(x) for x in parts[3].split(',')])
-            o3d_box = o3d.geometry.OrientedBoundingBox(center,rotation.reshape(3,3),extent)
-            o3d_box.color = (0,0,0)
-            # if'nan' in line:invalid_nodes.append(idx)
-            if 'nan' not in line:
-                boxes[idx] = o3d_box
-                # nodes[idx].load_box(o3d_box)
-                count+=1
-        f.close()
-        print('load {} boxes'.format(count))    
-        
-    # load instance info
-    with open(os.path.join(folder_dir,'instance_info.txt')) as f:
-        for line in f.readlines():
-            line = line.strip()
-            if'#' in line:continue
-            parts = line.split(';')
-            idx = int(parts[0])
-            if idx not in boxes: continue
-            label_score_vec = parts[1].split('(')
-            label = label_score_vec[0]
-            score = float(label_score_vec[1].split(')')[0])
-            if label in ignore_types: continue
-            # print('load {}:{}, {}'.format(idx,label,score))
-            
-            cloud = o3d.io.read_point_cloud(os.path.join(folder_dir,'{}.ply'.format(parts[0])))
-            cloud = cloud.voxel_down_sample(voxel_size)
-            xyz = np.asarray(cloud.points)
-            # if xyz.shape[0]<50: continue
-            xyzi.append(np.concatenate([xyz,idx*np.ones((len(xyz),1))],axis=1))
-            global_cloud = global_cloud + cloud
-            nodes[idx] = Instance(idx,cloud,label,score)
-            nodes[idx].cloud_dir = '{}.ply'.format(parts[0])
-            nodes[idx].load_box(boxes[idx])
-
-        f.close()
-        print('Load {} instances '.format(len(nodes)))
-    if len(xyzi)>0:
-        xyzi = np.concatenate(xyzi,axis=0)
-    
-    # # remove invalid nodes
-    # for idx in invalid_nodes:
-    #     nodes.pop(idx)
-        
-    return {'nodes':nodes,
-            'edges':[],
-            'global_cloud':global_cloud, 
-            'xyzi':xyzi}
+from sgreg.dataset.scene_graph import load_raw_scene_graph
+from sgreg.utils.utils import read_scans, read_scan_pairs
 
 def generate_edges(name:str,
                    graph:dict):
@@ -169,8 +84,7 @@ def generate_global_edges(name:str,graph:dict):
                 graph['global_edges'].append((idx,jdx,dist))
                 
     return graph
-    
-    
+     
 def compute_cloud_overlap(cloud_a:o3d.geometry.PointCloud,cloud_b:o3d.geometry.PointCloud,search_radius=0.2):
     # compute point cloud overlap 
     Na = len(cloud_a.points)
@@ -361,29 +275,6 @@ def get_geometries(graph:dict,translation=np.array([0,0,0]),rotate=np.eye(3),inc
     
     return geometries
 
-def get_instances_color(graph:dict):
-    N = len(graph['nodes'])
-    cell_width = 300
-    cell_height = 80
-    row_cells =  5
-    num_rows = N//row_cells + 1
-    color_img = 255*np.ones((num_rows *cell_height, row_cells * cell_width,3),dtype=np.uint8)
-    count = 0
-    print('{} nodes have {},{}'.format(N,num_rows,row_cells))
-    
-    for idx, instance in graph['nodes'].items():
-        row = count//row_cells
-        col = count%row_cells
-        color_img[row*cell_height:row*cell_height+cell_height,col*cell_width:col*cell_width+cell_width,:] = 255 * np.asarray(instance.cloud.colors)[0,:]
-        text = '{}_{}'.format(idx,instance.label)
-        cv2.putText(color_img,text,(col*cell_width+10,row*cell_height+cell_height//2),cv2.FONT_HERSHEY_SIMPLEX,1.0,(0,0,0),2)
-        # print('{}-{},{}-{}'.format(count, instance.label,row,col))
-        count += 1
-        
-    color_img = cv2.cvtColor(color_img,cv2.COLOR_RGB2BGR)
-    return color_img
-
-
 def get_match_lines(src_graph:dict,tar_graph:dict,matches,translation=np.array([0,0,0]),masks=None):
     lines = []
     for i, match in enumerate(matches):
@@ -473,8 +364,8 @@ def process_scene_pair(
                                                                   ref_scene_name))
 
     # load
-    src_graph = load_scene_graph(src_scene_dir)
-    ref_graph = load_scene_graph(ref_scene_dir)
+    src_graph = load_raw_scene_graph(src_scene_dir)
+    ref_graph = load_raw_scene_graph(ref_scene_dir)
     src_graph = generate_edges(src_scene_name,src_graph)
     ref_graph = generate_edges(ref_scene_name,ref_graph)
     

@@ -8,7 +8,7 @@ from sgreg.loss.eval import Evaluator
 from sgreg.utils.utils import read_scan_pairs
 from sgreg.utils.io import read_pred_nodes, read_corr_scores
 
-from os.path import join as pjoin
+from os.path import join as osp
 
 def read_points(dir:str):
     pcd = o3d.io.read_point_cloud(dir)
@@ -25,7 +25,7 @@ if __name__=='__main__':
     ############ Args ############
     DATAROOT = '/data2/RioGraph'
     SPLIT = 'val'
-    RESULT_FOLDER = pjoin(DATAROOT, 'output', 'sgnet_init_layer2')
+    RESULT_FOLDER = osp(DATAROOT, 'output', 'sgnet_init_layer2')
     ##############################
     
     cfg = OmegaConf.create({'eval': {'acceptance_overlap': 0.0, 
@@ -35,7 +35,7 @@ if __name__=='__main__':
     summary_rmse = []
     summary_recall = []
     
-    scene_pairs = read_scan_pairs(pjoin(DATAROOT, 'splits', SPLIT+'.txt'))
+    scene_pairs = read_scan_pairs(osp(DATAROOT, 'splits', SPLIT+'.txt'))
     print('Read {} scene pairs'.format(len(scene_pairs)))
     
     for scene_pair in scene_pairs:
@@ -43,17 +43,17 @@ if __name__=='__main__':
         scene_result_folder = os.path.join(RESULT_FOLDER, '{}-{}'.format(scene_pair[0],scene_pair[1]))
         
         # 1. load src points, node_matches, and correspondence points
-        src_points = read_points(pjoin(scene_result_folder,'src_instances.ply'))
-        _, _, src_centroids, ref_centroids, _ = read_pred_nodes(pjoin(scene_result_folder,'node_matches.txt'))
-        corr_src_points = read_points(pjoin(scene_result_folder,'corr_src.ply'))
-        corr_ref_points = read_points(pjoin(scene_result_folder,'corr_ref.ply'))
-        _, corr_scores, _ = read_corr_scores(pjoin(scene_result_folder,'point_matches.txt'))
+        src_points = read_points(osp(scene_result_folder,'src_instances.ply'))
+        _, _, src_centroids, ref_centroids, _ = read_pred_nodes(osp(scene_result_folder,'node_matches.txt'))
+        corr_src_points = read_points(osp(scene_result_folder,'corr_src.ply'))
+        corr_ref_points = read_points(osp(scene_result_folder,'corr_ref.ply'))
+        _, corr_scores, _ = read_corr_scores(osp(scene_result_folder,'point_matches.txt'))
         assert corr_src_points.shape[0] == corr_scores.shape[0]
         print('Read {} node matches and {} point corrs'.format(src_centroids.shape[0], 
                                                                corr_src_points.shape[0]))
         
         # 2. load gt
-        T_ref_src = np.loadtxt(pjoin(scene_result_folder, 'gt_transform.txt'))
+        T_ref_src = np.loadtxt(osp(scene_result_folder, 'gt_transform.txt'))
         
         # TODO 3. estimate transformation
         T_fake_pose = np.eye(4)
