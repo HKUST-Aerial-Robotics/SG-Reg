@@ -168,13 +168,15 @@ def get_parser_args():
                         help='source scene name')
     parser.add_argument('--ref_scene', type=str, default='scene0108_00a',
                         help='reference scene name')
-    parser.add_argument('--result_folder', type=str, default='output/sgnet_init_layer2',
+    parser.add_argument('--result_folder', type=str, default='output/sgnet_scannet_0080',
                         help='a relative path to the result folder')
     parser.add_argument('--viz_mode', type=int, required=True,
                         help='0: no viz, 1: local viz, 2: remote viz, 3: save rrd')
     parser.add_argument('--remote_rerun_add', type=str, help='IP:PORT')
     parser.add_argument('--find_gt', action='store_true',
                         help='align the scene graphs for bettter visualization')
+    parser.add_argument('--augment_transform', action='store_true',
+                        help='only enable it for ScanNet scenes.')
     parser.add_argument('--viz_translation', type=json.loads,
                         default='[0,0,0]',
                         help='translation to viz the scene graphs')
@@ -214,6 +216,8 @@ if __name__=='__main__':
     # Transform for better visualization
     transform = np.eye(4)
     if args.find_gt:
+        if 'ScanNet' in args.dataroot:
+            assert False, 'ScanNet scenes are already aligned. Remove the option.'
         gt_dir = osp(args.dataroot, 'gt', '{}-{}.txt'.format(args.src_scene,args.ref_scene))
         assert os.path.exists(gt_dir), 'gt file not found'
         gt = np.loadtxt(gt_dir)
@@ -233,6 +237,15 @@ if __name__=='__main__':
                                 np.eye(4),
                                 True)
     
+    if args.augment_transform:
+        if 'RioGraph' in args.dataroot: 
+            assert False, 'RIO dataset does not require augment transform. Remove the option.'
+        drift_dir = osp(RESULT_FOLDER,'gt_transform.txt')
+        transform = np.loadtxt(drift_dir)
+        assert os.path.exists(drift_dir), 'drift transform file not found'
+        src_cloud.transform(np.linalg.inv(transform))
+        transform[:3,3] += args.viz_translation
+          
     if os.path.exists(RESULT_FOLDER):
         render_correspondences('node_matches',
                             node_matches['src_centroids'],

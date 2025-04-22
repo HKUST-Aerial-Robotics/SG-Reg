@@ -378,7 +378,7 @@ def sgreg_collate_fn_stack_mode(data_dicts,
             ref_feats=ref_feats_list[scene_id],
             src_feats=src_feats_list[scene_id])
         if out_dict['points_dict']['lengths'][-1].sum() > point_limits:
-            print('[WARNING] {} superpoints. Exhaustive Memory.'.format(out_dict['points_dict']['lengths'][-1].sum()))
+            print('[WARNING] {} superpoints. Require large memory.'.format(out_dict['points_dict']['lengths'][-1].sum()))
     
         collated_dict['batch_points'].append(out_dict['points_dict'])
         collated_dict['batch_features'].append(out_dict['feats'])
