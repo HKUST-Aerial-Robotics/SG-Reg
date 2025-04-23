@@ -18,10 +18,10 @@
         </h5>
         <sup>*</sup>Corresponding Author
     </p>
-    <a href=""> <img src="https://img.shields.io/badge/IEEE-T--RO-004c99"> </a>
+    <a href="https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860"> <img src="https://img.shields.io/badge/IEEE-T--RO-004c99"> </a>
     <a href='https://arxiv.org/abs/2504.14440'><img src='https://img.shields.io/badge/arXiv-2504.14440-990000' alt='arxiv'></a>
-    <a href="https://youtu.be/IDxAmvpB2T0"><img alt="YouTube" src="https://img.shields.io/badge/Video-YouTube-red"/></a>
-    <a href=""><img alt="Bilibili" src="https://img.shields.io/badge/Video-Bilibili-pink"/></a>
+    <a href="https://youtu.be/k_kPFKcj-jo"><img alt="YouTube" src="https://img.shields.io/badge/Video-YouTube-red"/></a>
+    <a href="https://www.bilibili.com/video/BV1ymLWzaEMo/"><img alt="Bilibili" src="https://img.shields.io/badge/Video-Bilibili-pink"/></a>
 
 </div>
 
@@ -30,7 +30,8 @@
 </p>
 
 ### News
-* [19 Apr 2025] Our paper is accepted by IEEE T-RO as a regular paper.
+* [21 Apr 2025] Publish the initial version of code.
+* [19 Apr 2025] Our paper is accepted by [IEEE T-RO](https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860) as a regular paper.
 * [8 Oct 2024] Paper submitted to IEEE T-RO.
 
 In this work, we **learn to register two semantic scene graphs**, an essential capability when an autonomous agent needs to register its map against a remote agent, or against a prior map. To acehive a generalizable registration in the real-world, we design a scene graph network to encode multiple modalities of semantic nodes: open-set semantic feature, local topology with spatial awareness, and shape feature. SG-Reg represents a dense indoor scene in **coarse node features** and **dense point features**. In multi-agent SLAM systems, this representation supports both coarse-to-fine localization and bandwidth-efficient communication. 
@@ -53,8 +54,7 @@ python setup.py build develop
 ## 2. Download
 Download our network weights from this [Dropbox link](https://www.dropbox.com/scl/fi/92f1fju4m6ikypopdxg2z/sgnet_scannet_0080.zip?rlkey=32ixcwx7onm9vjkzvwgfwqnq3&st=sokdtktv&dl=0) and uncompress the downloaded ```.zip``` file. Save the ```sgnet_scannet_0080``` at a directory you like, which is labelled as ```CHECKPOINT_FOLDER```.
 
-Download the 3RScan data [坚果云nutStore link](https://www.jianguoyun.com/p/DVNIaZYQmcSyDRjX8PQFIAA). It involves $50$ pairs of scene graphs. The data are organized in the following structures.
-<!-- todo -->
+Download the *3RScan (RIO)* data [坚果云nutStore link](https://www.jianguoyun.com/p/DVNIaZYQmcSyDRjX8PQFIAA). It involves $50$ pairs of scene graphs. In ```RIO_DATAROOT```, the data are organized in the following structures.
 ```
 |--val
     |--scenexxxx_00a % each individual scene graph
@@ -71,9 +71,9 @@ Download the 3RScan data [坚果云nutStore link](https://www.jianguoyun.com/p/D
 ```
 
 
-We also provide another 50 pairs of ScanNet scenes. Please download the ScanNet data using this [坚果云nutStore link](https://www.jianguoyun.com/p/DSJqTN8QmcSyDRjZ8PQFIAA). They are organized in the same data structure as the 3RScan data.
+We also provide another 50 pairs of *ScanNet* scenes. Please download the ScanNet data using this [坚果云nutStore link](https://www.jianguoyun.com/p/DSJqTN8QmcSyDRjZ8PQFIAA). They are organized in the same data structure as the 3RScan data.
 
-
+*Note: We did not use any ground-truth semantic annotation from [3RScan](https://github.com/WaldJohannaU/3RScan) or [ScanNet](https://github.com/ScanNet/ScanNet). The downloaded scene graphs are reconstructed using [FM-Fusion](https://github.com/HKUST-Aerial-Robotics/FM-Fusion). You can also download the original RGB-D sequences and build your scene graphs using FM-Fusion. If you want to try, ScanNet sequences should be easier to start with.
 
 ## 3. Inference 3RScan Scenes
 To run the inference program, 
@@ -99,7 +99,7 @@ python sgreg/visualize.py --dataroot $SCANNET_DATAROOT$ --viz_mode 1 --augment_t
 ```
 
 ## 4. Evaluate on your own data
-If you are interested in the semantic scene graph tasks we are doing, we encourage you to collect your own RGB-D sequence to evaluate. 
+We think generalization capability remains to be a key challenge in 3D semantic perception. If you are interested in the task we are doing, we encourage you to collect your own RGB-D sequence to evaluate. 
 It requires [VINS-Mono](https://github.com/HKUST-Aerial-Robotics/VINS-Mono) to compute camera poses, [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) to generate semantic labels, and [FM-Fusion](https://github.com/HKUST-Aerial-Robotics/FM-Fusion) to reconstruct a semantic scene graph.
 We will add a detailed instruction later to illustrate how to build your own data.
 
@@ -114,10 +114,10 @@ We will add a detailed instruction later to illustrate how to build your own dat
 - [ ] Validation the entire system in a new computer. 
 - [x] A tutorial for running the validation.
 
-We will continue to maintain this repo. If you encounter any problem in using it, feel free to publish an issue.
+We will continue to maintain this repo. If you encounter any problem in using it, feel free to publish an issue. We'll try to help.
 
 ## 6. Acknowledge
-We used some of the code from [GeoTransformer](https://github.com/qinzheng93/GeoTransformer), [SG-PGM](https://github.com/dfki-av/sg-pgm) and [LightGlue](https://github.com/cvg/LightGlue). [SkyLand](https://www.futureis3d.com) provides lidar-camera suite to allow us evaluating SG-Reg in large-scale scenes (as demonstrated in our [video]()).
+We used some of the code from [GeoTransformer](https://github.com/qinzheng93/GeoTransformer), [SG-PGM](https://github.com/dfki-av/sg-pgm) and [LightGlue](https://github.com/cvg/LightGlue). [SkyLand](https://www.futureis3d.com) provides lidar-camera suite to allow us evaluating SG-Reg in large-scale scenes (as demonstrated at the end of the [video](https://youtu.be/k_kPFKcj-jo)).
 
 ## 7. License
 The source code is released under [GPLv3](https://www.gnu.org/licenses/) license.
