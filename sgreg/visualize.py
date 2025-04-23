@@ -67,13 +67,15 @@ def render_node_bboxes(entity_name:str,
                        radius=0.01):
     
     for idx, node in nodes.items():
+        quad = R.from_matrix(node.box.R).as_quat()
+        # print(node.box.R)
         rr.log('{}/{}'.format(entity_name,idx),
                rr.Boxes3D(half_sizes=0.5*node.box.extent,
                           centers=node.box.center,
+                          quaternions=rr.Quaternion(xyzw=quad),
                           radii=radius,
                           labels=node.label,
-                          show_labels=show_labels,
-                          colors=None)
+                          show_labels=show_labels)
                )
                
     
