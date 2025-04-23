@@ -154,7 +154,7 @@ def train_epoch(data_loader, model, model_fn, optimizer, scheduler,epoch):
                           'registration':registration_recall_summary.get_metrics(True,True),
                           'PIR':PIR}
 
-def val_epoch(data_loader, model, model_fn, epoch, save_dir=''):
+def val_epoch(data_loader, model, model_fn, save_dir=''):
     print('validation start. Save result to {}'.format(save_dir))
     
     scene_pairs = []
@@ -386,8 +386,8 @@ if __name__ == '__main__':
             model.eval()
             val_loss_dict, eval_val_dict = val_epoch(val_loader, 
                                                      model, 
-                                                     model_fn, 
-                                                     epoch)
+                                                     model_fn)
+                                                     
 
             for k,v in val_loss_dict.items():
                 writer.add_scalar('val/{}'.format(k), v, epoch)
@@ -407,7 +407,7 @@ if __name__ == '__main__':
 
     # Save
     if conf.train.val_interval>0:
-        val_epoch(val_loader, model, model_fn, cur_epoch, save_dir=output_folder)    
+        val_epoch(val_loader, model, model_fn, save_dir=output_folder)    
     # print('save to {}'.format(cfg.run_dir))
     # save_ckpt(model=model,
     #           optimizer=optimizer,

@@ -2,6 +2,8 @@ import sys,time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from huggingface_hub import PyTorchModelHubMixin
+
 # from model.bert.get_tokenizer import get_tokenlizer, get_pretrained_language_model
 from sgreg.bert.bertwarper import generate_bert_fetures
 
@@ -18,7 +20,8 @@ from sgreg.utils.utils import update_dict, create_mask_from_edges
 from sgreg.utils.tictoc import TicToc
 # from model.ops.instance_partition import sample_k_instance_points
 
-class SGNet(nn.Module):
+class SGNet(nn.Module,
+            PyTorchModelHubMixin):
     default_config = {
         "bert_dim": 768,
         "gat_heads": 4

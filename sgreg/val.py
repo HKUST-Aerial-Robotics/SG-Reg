@@ -133,10 +133,11 @@ if __name__ == '__main__':
     parser.add_argument('--cfg_file', type=str, default='config/scannet.yaml', 
                         help='path to config file')   
     parser.add_argument('--checkpoint', type=str, 
-                        help='folder to save/load checkpoint')
+                        help='folder to load checkpoint if it is set')
     parser.add_argument('--test', action='store_true', help='test mode')
     parser.add_argument('--epoch',type=int,help='Load checkpoint at assigned epoch',default=-1)
-    parser.add_argument('--output', type=str, default='', help='output folder')
+    parser.add_argument('--output', type=str, default='sgnet_scannet_0080', help='save results to here')
+    parser.add_argument('--push2hf', action='store_true', help='push model to huggingface hub')
     args = parser.parse_args()
     
     # Paramters 
@@ -145,19 +146,30 @@ if __name__ == '__main__':
     conf = create_cfg(conf)
     
     # Model 
-    model = SGNet(conf=conf)
-    model = model.cuda()
-    epoch, f = checkpoint_restore(model,
-                                  args.checkpoint,
-                                  'sgnet',
-                                  args.epoch)
+    if args.checkpoint is None:
+        print('Loading checkpoint from huggingface hub')
+        model = SGNet.from_pretrained('glennliu/sgnet',
+                                          conf=conf)
+        model = model.cuda()
+        print('Loaded checkpoint')
+    else:
+        model = SGNet(conf=conf)
+        model = model.cuda()
+        epoch, f = checkpoint_restore(model,
+                                    args.checkpoint,
+                                    'sgnet',
+                                    args.epoch)
 
     for name, params in model.named_parameters():
         if name.split('.')[0] in conf.model.fix_modules:
             params.requires_grad = False    
     model.eval()
     model_fn = SGNetDecorator(conf=conf)
-
+    if args.push2hf:
+        model.push_to_hub('glennliu/sgnet')
+        print('Push model to huggingface glennliu/sgnet')
+        exit(0)
+           
     # Dataset
     val_loader, _ = val_data_loader(conf)
     print('Validation dataset: {} batches'.format(len(val_loader)))
@@ -168,12 +180,14 @@ if __name__ == '__main__':
                                 'output',
                                 os.path.basename(args.checkpoint))
     else:
-        pred_output = args.output
+        pred_output = os.path.join(conf.dataset.dataroot,
+                                   'output',
+                                    args.output)
     os.makedirs(pred_output,exist_ok=True)
     OmegaConf.save(conf, os.path.join(pred_output,'config.yaml'))
 
     # Val    
     loss_metrics, eval_metrics =val_epoch(
-        val_loader, model, model_fn, epoch -1,save_dir=pred_output)   
+        val_loader, model, model_fn,save_dir=pred_output)   
     
     

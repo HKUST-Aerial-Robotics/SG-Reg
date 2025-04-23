@@ -51,9 +51,7 @@ pip install -r requirements.txt
 python setup.py build develop
 ```
 
-## 2. Download
-Download our network weights from this [Dropbox link](https://www.dropbox.com/scl/fi/92f1fju4m6ikypopdxg2z/sgnet_scannet_0080.zip?rlkey=32ixcwx7onm9vjkzvwgfwqnq3&st=sokdtktv&dl=0) and uncompress the downloaded ```.zip``` file. Save the ```sgnet_scannet_0080``` at a directory you like, which is labelled as ```CHECKPOINT_FOLDER```.
-
+## 2. Download Dataset
 Download the *3RScan (RIO)* data [坚果云nutStore link](https://www.jianguoyun.com/p/DVNIaZYQmcSyDRjX8PQFIAA). It involves $50$ pairs of scene graphs. In ```RIO_DATAROOT```, the data are organized in the following structures.
 ```
 |--val
@@ -66,7 +64,7 @@ Download the *3RScan (RIO)* data [坚果云nutStore link](https://www.jianguoyun
 |--matches
     |-- SRCSCENE-REFSCENE.pth % ground-truth node matches
 |--output
-    |--CHECKPOINT_NAME
+    |--CHECKPOINT_NAME % default: sgnet_scannet_0080
         |--SRCSCENE-REFSCENE % results of scene pair
 ```
 
@@ -78,7 +76,7 @@ We also provide another 50 pairs of *ScanNet* scenes. Please download the ScanNe
 ## 3. Inference 3RScan Scenes
 To run the inference program, 
 ```bash
-python sgreg/val.py --cfg_file config/rio.yaml --checkpoint $CHECKPOINT_FOLDER$
+python sgreg/val.py --cfg_file config/rio.yaml
 ```
 It will inference all of the downloaded scene pairs in 3RScan. The registration results, including matched nodes, point correspondences and predicted transformation are saved at ```RIO_DATAROOT/ouptut/CHECKPOINT_NAME/SRCSCENE-REFSCENE```. You can visualize the registration results,
 ```bash
@@ -94,7 +92,7 @@ If you run the program on a remote server, rerun supports remote visualization (
 
 *[Optional]* If you want to evaluate SG-Reg on ScanNet sequences, adjust the running options as below,
 ```bash
-python sgreg/val.py --cfg_file config/scannet.yaml --checkpoint $CHECKPOINT_FOLDER$ 
+python sgreg/val.py --cfg_file config/scannet.yaml 
 python sgreg/visualize.py --dataroot $SCANNET_DATAROOT$ --viz_mode 1 --augment_transform --viz_translation [3.0,5.0,0.0]
 ```
 
@@ -110,7 +108,8 @@ We will add a detailed instruction later to illustrate how to build your own dat
 - [x] Visualize the results.
 - [x] Provide RIO scene graph data for download.
 - [x] Provide network weight for download.
-- [ ] Registration back-end in python interface.
+- [x] Publish checkpoint on Huggingface Hub and reload.
+- [ ] Registration back-end in python interface. (The version used in the paper is a C++ version.)
 - [ ] Validation the entire system in a new computer. 
 - [x] A tutorial for running the validation.
 
