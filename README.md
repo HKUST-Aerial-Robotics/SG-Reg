@@ -76,7 +76,7 @@ We also provide another 50 pairs of *ScanNet* scenes. Please download the ScanNe
 *Note: We did not use any ground-truth semantic annotation from [3RScan](https://github.com/WaldJohannaU/3RScan) or [ScanNet](https://github.com/ScanNet/ScanNet). The downloaded scene graphs are reconstructed using [FM-Fusion](https://github.com/HKUST-Aerial-Robotics/FM-Fusion). You can also download the original RGB-D sequences and build your scene graphs using FM-Fusion. If you want to try, ScanNet sequences should be easier to start with.
 
 ## 3. Inference 3RScan Scenes
-To run the inference program, 
+Find the [config/rio.yaml](config/rio.yaml) and set the ```dataroot/dataroot``` to be the ```RIO_DATASET``` directory on your machine. Then, run the inference program, 
 ```bash
 python sgreg/val.py --cfg_file config/rio.yaml --checkpoint $CHECKPOINT_FOLDER$
 ```
