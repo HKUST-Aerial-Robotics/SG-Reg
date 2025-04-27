@@ -14,12 +14,12 @@ setup(
         CUDAExtension(
             name='.ext',
             sources=[
-                'sgnet/extensions/extra/cloud/cloud.cpp',
-                'sgnet/extensions/cpu/grid_subsampling/grid_subsampling.cpp',
-                'sgnet/extensions/cpu/grid_subsampling/grid_subsampling_cpu.cpp',
-                'sgnet/extensions/cpu/radius_neighbors/radius_neighbors.cpp',
-                'sgnet/extensions/cpu/radius_neighbors/radius_neighbors_cpu.cpp',
-                'sgnet/extensions/pybind.cpp',
+                'sgreg/extensions/extra/cloud/cloud.cpp',
+                'sgreg/extensions/cpu/grid_subsampling/grid_subsampling.cpp',
+                'sgreg/extensions/cpu/grid_subsampling/grid_subsampling_cpu.cpp',
+                'sgreg/extensions/cpu/radius_neighbors/radius_neighbors.cpp',
+                'sgreg/extensions/cpu/radius_neighbors/radius_neighbors_cpu.cpp',
+                'sgreg/extensions/pybind.cpp',
             ],
         ),
     ],
