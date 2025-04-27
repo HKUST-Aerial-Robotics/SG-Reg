@@ -20,7 +20,7 @@
     </p>
     <a href="https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860"> <img src="https://img.shields.io/badge/IEEE-T--RO-004c99"> </a>
     <a href='https://arxiv.org/abs/2504.14440'><img src='https://img.shields.io/badge/arXiv-2504.14440-990000' alt='arxiv'></a>
-    <a href="https://youtu.be/k_kPFKcj-jo"><img alt="YouTube" src="https://img.shields.io/badge/Video-YouTube-red"/></a>
+    <a href="https://youtu.be/s3P1FvbQGhs?si=Zr4tY1crdl-2pSuV"><img alt="YouTube" src="https://img.shields.io/badge/Video-YouTube-red"/></a>
     <a href="https://www.bilibili.com/video/BV1ymLWzaEMo/"><img alt="Bilibili" src="https://img.shields.io/badge/Video-Bilibili-pink"/></a>
 
 </div>
