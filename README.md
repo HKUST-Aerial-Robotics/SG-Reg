@@ -18,12 +18,13 @@
         </h5>
         <sup>*</sup>Corresponding Author
     </p>
-    <a href="https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860"> <img src="https://img.shields.io/badge/IEEE-T--RO-004c99"> </a>
-    <a href='https://arxiv.org/abs/2504.14440'><img src='https://img.shields.io/badge/arXiv-2504.14440-990000' alt='arxiv'></a>
-    <a href="https://youtu.be/s3P1FvbQGhs?si=Zr4tY1crdl-2pSuV"><img alt="YouTube" src="https://img.shields.io/badge/Video-YouTube-red"/></a>
-    <a href="https://www.bilibili.com/video/BV1ymLWzaEMo/"><img alt="Bilibili" src="https://img.shields.io/badge/Video-Bilibili-pink"/></a>
-
 </div>
+
+[![T-RO](https://img.shields.io/badge/IEEE-T--RO-004c99)](https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860)
+[![Arxiv](https://img.shields.io/badge/arXiv-2504.14440-990000)](https://arxiv.org/abs/2504.14440)
+[![YouTube](https://badges.aleen42.com/src/youtube.svg)](https://youtu.be/s3P1FvbQGhs) 
+[![Bilibili](https://img.shields.io/badge/Video-Bilibili-pink)](https://www.bilibili.com/video/BV1ymLWzaEMo/)
+[![HuggingFace Space](https://img.shields.io/badge/🤗-HuggingFace%20Space-cyan.svg)](https://huggingface.co/glennliu/sgnet)
 
 <p align="center">
     <img src="docs/system.001.png" width="800"/>
