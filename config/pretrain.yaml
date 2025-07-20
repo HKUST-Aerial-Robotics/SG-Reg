@@ -1,0 +1,95 @@
+model:
+  gtransformer_weight: /home/cliuci/code_ws/GeoTransformer/output/geotransformer.scannet.finetune.optimized/snapshot/epoch-40.pth.tar
+  fix_modules: ['backbone','optimal_transport']
+dataset:
+  name: scannet
+  dataroot: /data2/ScanNetGraph
+  # verify_instance_points: True
+  min_iou: 0.3 # for gt match
+  global_edges_dist: 1.0
+  online_bert: False
+train:
+  batch_size: 1
+  num_workers: 4
+  epochs: 64
+  optimizer: Adam # Adam, SGD
+  lr: 0.01
+  weight_decay: 0.0001
+  momentum: 0.9
+  save_interval: 10
+  val_interval: 2
+  registration_in_train: False
+backbone:
+  num_stages: 4
+  init_voxel_size: 0.05
+  base_radius: 2.5
+  base_sigma: 2.0
+  input_dim: 1
+  output_dim: 256
+  init_dim: 64
+  kernel_size: 15
+  group_norm: 32
+shape_encoder:
+  input_from_stages: 1
+  output_dim: 1024
+  kernel_size: 15
+  init_radius: 2.5 # 0.125
+  init_sigma: 2.0 # 0.1
+  group_norm: 32
+  point_limit: 2048
+scenegraph:
+  bert_dim: 768
+  semantic_dim: 64
+  pos_dim: -1
+  box_dim: 8
+  fuse_shape: false
+  fuse_stage: late
+  node_dim: 64
+  encode_method: 'gnn'
+  gnn:
+    all_self_edges: False
+    position_encoding: true
+    layers: [ltriplet] # sage,self,gtop,sattn
+    triplet_mlp: ffn # concat, ffn or projector
+    triplet_activation: relu
+    heads: 1
+    hidden_dim : 16
+    enable_dist_embedding: true
+    enable_angle_embedding: True
+    reduce: 'mean'
+  se_layer: False
+instance_matching:
+  # match_feature: 'fgnn' # f0, fgnn
+  match_layers: [0,1]
+  topk: 3
+  min_score: 0.05  
+  multiply_matchability: True
+fine_matching:
+  min_nodes: 3
+  num_points_per_instance: 256    
+  num_sinkhorn_iterations: 100
+  topk: 3
+  acceptance_radius: 0.1
+  max_instance_selection: False
+  mutual: True
+  confidence_threshold: 0.05
+  use_dustbin: true
+  ignore_semantics: [floor, carpet]
+loss:
+  instance_match:
+    loss_func: nllv2 # overlap, nll
+    nll_negative: 1.0
+    gt_alpha: 2.0
+  fine_loss_weight: 1.0
+  shape_contrast_weight: 1.0
+  innode_match_weight: -1.0
+  gnode_match_weight: -1.0
+  start_epoch: 0
+  positive_point_radius: 0.1
+  contrastive_temp: 0.1
+  contrastive_postive_overlap: 0.3
+  # nll_matchability: False
+eval: 
+  acceptance_overlap: 0.0
+  acceptance_radius: 0.1
+  rmse_threshold: 0.2
